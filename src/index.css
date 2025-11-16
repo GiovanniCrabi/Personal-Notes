@@ -1,0 +1,10 @@
+
+@import "tailwindcss";
+
+@theme {
+  --font-family-sans: 'Roboto', system-ui, sans-serif;
+  
+  /* Você pode adicionar outras customizações aqui */
+  --color-primary: #3b82f6;
+  --color-secondary: #8b5cf6;
+}
