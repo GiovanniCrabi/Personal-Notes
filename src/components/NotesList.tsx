@@ -19,7 +19,7 @@ export const NotesList: React.FC<NotesListProps> = ({
 }) => {
   if (notes.length === 0) {
     return (
-      <div className="text-center text-gray-500 py-8">
+      <div className="text-center text-gray-500 py-8 text-sm sm:text-base">
         {searchTerm ? 'No notes found' : 'No notes yet'}
       </div>
     );
@@ -31,19 +31,19 @@ export const NotesList: React.FC<NotesListProps> = ({
         <div
           key={note.id}
           onClick={() => onSelectNote(note)}
-          className={`p-3 rounded-lg cursor-pointer transition-colors ${
+          className={`p-2.5 sm:p-3 rounded-lg cursor-pointer transition-colors active:scale-[0.98] ${
             selectedNote?.id === note.id
               ? 'bg-purple-50 border-2 border-purple-500'
-              : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+              : 'bg-gray-50 hover:bg-gray-100 active:bg-gray-200 border-2 border-transparent'
           }`}
         >
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-gray-800 truncate">{note.title}</h3>
-              <p className="text-sm text-gray-600 line-clamp-2 mt-1">
+              <h3 className="font-medium text-sm sm:text-base text-gray-800 truncate">{note.title}</h3>
+              <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mt-1 break-words">
                 {note.content || 'Empty note'}
               </p>
-              <p className="text-xs text-gray-400 mt-2">
+              <p className="text-xs text-gray-400 mt-1.5 sm:mt-2">
                 {note.updatedAt.toLocaleDateString('en-US', {
                   day: '2-digit',
                   month: 'short',
@@ -58,10 +58,10 @@ export const NotesList: React.FC<NotesListProps> = ({
                   onDeleteNote(note.id);
                 }
               }}
-              className="ml-2 p-1.5 hover:bg-red-100 rounded transition-colors shrink-0"
+              className="ml-2 p-1.5 hover:bg-red-100 active:bg-red-200 rounded transition-colors shrink-0"
               title="Delete note"
             >
-              <Trash2 className="w-4 h-4 text-red-500" />
+              <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500" />
             </button>
           </div>
         </div>

@@ -8,3 +8,58 @@
   --color-primary: #3b82f6;
   --color-secondary: #8b5cf6;
 }
+
+/* Melhorias de responsividade e touch */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  /* Previne zoom em inputs no iOS */
+  -webkit-text-size-adjust: 100%;
+  /* Scroll suave */
+  scroll-behavior: smooth;
+}
+
+body {
+  /* Previne scroll horizontal indesejado */
+  overflow-x: hidden;
+  /* Melhora o scroll no mobile */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Melhora a experiência de scroll em mobile */
+.overflow-y-auto {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Previne seleção de texto em elementos interativos */
+button, .cursor-pointer {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Melhora o feedback visual em touch */
+button:active, .cursor-pointer:active {
+  opacity: 0.9;
+}
+
+/* Garante que inputs sejam legíveis em mobile sem zoom */
+input, textarea, select {
+  font-size: 16px;
+}
+
+@media (min-width: 640px) {
+  input, textarea, select {
+    font-size: 1rem;
+  }
+}
+
+/* Melhora a área de toque em mobile */
+@media (max-width: 1023px) {
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, LogOut, User, Search } from 'lucide-react';
+import { Plus, LogOut, User, Search, Menu, X } from 'lucide-react';
 import { useAuth } from './hooks/useAuth';
 import { useNotes } from './hooks/useNotes';
 import { AuthForm } from './components/AuthForm';
@@ -16,8 +16,8 @@ const App: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Deriva a nota selecionada do ID, sempre pegando a versão mais atual
   const selectedNote = selectedNoteId 
     ? notes.find(n => n.id === selectedNoteId) || null
     : null;
@@ -28,44 +28,36 @@ const App: React.FC = () => {
   );
 
   const handleCreateNote = async () => {
-    console.log('🔵 Botão New Note clicado');
-    console.log('🔵 User ID:', user?.id);
-    console.log('🔵 Função addNote existe?', typeof addNote === 'function');
+
     
     try {
-      console.log('🔵 Iniciando criação da nota...');
       const noteId = await addNote('New Note', '');
-      console.log('✅ Nota criada com ID:', noteId);
       
       setSelectedNoteId(noteId);
       setIsEditing(true);
       setEditTitle('New Note');
       setEditContent('');
       
-      console.log('✅ Estado atualizado');
     } catch (error) {
-      console.error('❌ Erro ao criar nota:', error);
       alert(`Erro ao criar nota: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
     }
   };
 
   const handleSelectNote = (note: Note) => {
-    console.log('🔵 Nota selecionada:', note.id);
     setSelectedNoteId(note.id);
     setIsEditing(false);
     setEditTitle(note.title);
     setEditContent(note.content);
+    setIsSidebarOpen(false);
   };
 
   const handleSaveNote = async () => {
     if (selectedNote) {
       try {
-        console.log('🔵 Salvando nota:', selectedNote.id);
         await updateNote(selectedNote.id, editTitle, editContent);
         setIsEditing(false);
-        console.log('✅ Nota salva com sucesso');
       } catch (error) {
-        console.error('❌ Erro ao salvar nota:', error);
+        console.error(' Erro ao salvar nota:', error);
         alert('Erro ao salvar nota. Tente novamente.');
       }
     }
@@ -115,43 +107,68 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex relative">
+      {/* Overlay para mobile */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+      <div
+        className={`
+          fixed lg:relative inset-y-0 left-0 z-50
+          w-full sm:w-80 lg:w-80
+          bg-white border-r border-gray-200 flex flex-col
+          transform transition-transform duration-300 ease-in-out
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}
+      >
         {/* Header */}
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold text-gray-800">Minhas Notas</h1>
-            <button
-              onClick={handleSignOut}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              title="Sair"
-            >
-              <LogOut className="w-5 h-5 text-gray-600" />
-            </button>
+        <div className="p-3 sm:p-4 border-b border-gray-200">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h1 className="text-lg sm:text-xl font-bold text-gray-800">Minhas Notas</h1>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <button
+                onClick={handleSignOut}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Sair"
+              >
+                <LogOut className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+              </button>
+              <button
+                onClick={() => setIsSidebarOpen(false)}
+                className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Fechar"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 mb-3">
-            <User className="w-4 h-4 text-gray-500" />
-            <span className="text-sm text-gray-600 truncate">{user.email}</span>
+          <div className="flex items-center gap-2 mb-3 px-1">
+            <User className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 shrink-0" />
+            <span className="text-xs sm:text-sm text-gray-600 truncate">{user.email}</span>
           </div>
 
           <div className="relative">
-            <Search className="w-5 h-5 absolute left-3 top-2.5 text-gray-400" />
+            <Search className="w-4 h-4 sm:w-5 sm:h-5 absolute left-3 top-2 sm:top-2.5 text-gray-400" />
             <input
               type="text"
               placeholder="Buscar notas..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
           </div>
         </div>
 
         {/* Lista de Notas */}
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4">
           {notesLoading ? (
-            <div className="text-center text-gray-500 py-8">Updating Notes...</div>
+            <div className="text-center text-gray-500 py-8 text-sm sm:text-base">Updating Notes...</div>
           ) : (
             <NotesList
               notes={filteredNotes}
@@ -164,20 +181,33 @@ const App: React.FC = () => {
         </div>
 
         {/* Botão New Note */}
-        <div className="p-4 border-t border-gray-200">
+        <div className="p-3 sm:p-4 border-t border-gray-200">
           <button
             onClick={handleCreateNote}
             disabled={!addNote || notesLoading}
-            className="cursor-grab w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 font-medium disabled:bg-purple-400 disabled:cursor-not-allowed"
+            className="w-full bg-purple-600 text-white py-2 sm:py-2.5 rounded-lg hover:bg-purple-700 active:bg-purple-800 transition-colors flex items-center justify-center gap-2 font-medium disabled:bg-purple-400 disabled:cursor-not-allowed text-sm sm:text-base"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
             New Note
           </button>
         </div>
       </div>
 
       {/* Área de Edição */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col w-full lg:w-auto">
+        {/* Botão Menu Mobile */}
+        {!selectedNote && (
+          <div className="lg:hidden p-4 border-b border-gray-200 bg-white">
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="flex items-center gap-2 text-gray-700 font-medium"
+            >
+              <Menu className="w-5 h-5" />
+              <span>Menu</span>
+            </button>
+          </div>
+        )}
+
         <NoteEditor
           note={selectedNote}
           isEditing={isEditing}
@@ -188,6 +218,10 @@ const App: React.FC = () => {
           onStartEdit={() => setIsEditing(true)}
           onSave={handleSaveNote}
           onCancel={handleCancelEdit}
+          onBack={() => {
+            setSelectedNoteId(null);
+            setIsSidebarOpen(true);
+          }}
         />
       </div>
     </div>
