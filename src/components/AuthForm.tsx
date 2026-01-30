@@ -7,7 +7,7 @@ interface AuthFormProps {
 }
 
 interface PasswordStrength {
-  score: number; // 0-4
+  score: number;
   label: string;
   color: string;
   bgColor: string;
@@ -30,7 +30,6 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSignIn, onSignUp }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
 
-  // Regras de validação de senha
   const passwordRules: ValidationRule[] = [
     {
       test: (pwd) => pwd.length >= 8,
@@ -54,7 +53,6 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSignIn, onSignUp }) => {
     },
   ];
 
-  // Calcula a força da senha
   const getPasswordStrength = (pwd: string): PasswordStrength => {
     if (!pwd) {
       return { score: 0, label: "", color: "", bgColor: "" };
@@ -77,13 +75,11 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSignIn, onSignUp }) => {
 
   const passwordStrength = getPasswordStrength(password);
 
-  // Valida email
   const isValidEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  // Validação do formulário
   const validateForm = (): string | null => {
     if (!email.trim()) {
       return "Please enter your email";
@@ -98,7 +94,6 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSignIn, onSignUp }) => {
     }
 
     if (isSignUp) {
-      // Validações extras para cadastro
       if (password.length < 8) {
         return "Password must be at least 8 characters";
       }
@@ -116,7 +111,6 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSignIn, onSignUp }) => {
         return "Passwords do not match";
       }
     } else {
-      // Validação mínima para login
       if (password.length < 6) {
         return "Password must be at least 6 characters";
       }
@@ -126,7 +120,6 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSignIn, onSignUp }) => {
   };
 
   const handleSubmit = async () => {
-    // Validação do formulário
     const validationError = validateForm();
     if (validationError) {
       setError(validationError);
@@ -178,21 +171,26 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSignIn, onSignUp }) => {
   }, [isSignUp]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-5 sm:p-6 md:p-8 w-full max-w-md">
-        <div className="text-center mb-6 sm:mb-8">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2">
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="glass rounded-3xl shadow-2xl p-8 sm:p-10 w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="inline-block p-4 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl mb-4">
+            <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-bold gradient-text mb-2">
             My Notes
           </h1>
-          <p className="text-sm sm:text-base text-gray-600">
-            {isSignUp ? "Create your account" : "Sign in to your account"}
+          <p className="text-sm sm:text-base text-gray-700 font-medium">
+            {isSignUp ? "Create your account" : "Welcome back"}
           </p>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs sm:text-sm flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 mt-0.5" />
-            <span>{error}</span>
+          <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-700 text-sm flex items-start gap-3 shadow-sm">
+            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+            <span className="font-medium">{error}</span>
           </div>
         )}
 
@@ -203,7 +201,6 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSignIn, onSignUp }) => {
           }}
           className="space-y-3 sm:space-y-4"
         >
-          {/* Email */}
           <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
               Email
@@ -219,7 +216,6 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSignIn, onSignUp }) => {
             />
           </div>
 
-          {/* Password */}
           <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
               Password
@@ -250,7 +246,6 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSignIn, onSignUp }) => {
               </button>
             </div>
 
-            {/* Indicador de força da senha (apenas no cadastro) */}
             {isSignUp && password && (
               <div className="mt-2">
                 <div className="flex items-center justify-between mb-1">
@@ -269,7 +264,6 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSignIn, onSignUp }) => {
             )}
           </div>
 
-          {/* Confirm Password (apenas no cadastro) */}
           {isSignUp && (
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
@@ -317,7 +311,6 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSignIn, onSignUp }) => {
             </div>
           )}
 
-          {/* Requisitos de senha (apenas no cadastro quando focado) */}
           {isSignUp && (passwordFocused || password) && (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
               <p className="text-xs font-medium text-gray-700 mb-2">
@@ -349,17 +342,24 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSignIn, onSignUp }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-purple-600 text-white py-2 sm:py-2.5 rounded-lg hover:bg-purple-700 active:bg-purple-800 transition-colors font-medium disabled:bg-purple-400 disabled:cursor-not-allowed text-sm sm:text-base"
+            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3.5 rounded-xl hover:from-indigo-700 hover:to-purple-700 active:scale-95 transition-smooth font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl text-base"
           >
-            {loading ? "Loading..." : isSignUp ? "Create Account" : "Sign In"}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                Loading...
+              </span>
+            ) : (
+              isSignUp ? "Create Account" : "Sign In"
+            )}
           </button>
         </form>
 
-        <div className="mt-5 sm:mt-6 text-center">
+        <div className="mt-6 text-center">
           <button
             onClick={() => setIsSignUp(!isSignUp)}
             disabled={loading}
-            className="text-purple-600 hover:text-purple-700 active:text-purple-800 text-xs sm:text-sm font-medium disabled:text-purple-400 transition-colors"
+            className="text-indigo-600 hover:text-indigo-700 active:text-indigo-800 text-sm font-semibold disabled:opacity-50 transition-smooth"
           >
             {isSignUp
               ? "Already have an account? Sign in"

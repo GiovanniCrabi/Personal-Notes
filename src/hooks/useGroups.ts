@@ -11,39 +11,37 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
-import type { Note, NoteItem } from "../types";
+import type { Group, GroupType } from "../types";
 
-export const useNotes = (userId: string | null, groupId: string | null) => {
-  const [notes, setNotes] = useState<Note[]>([]);
+export const useGroups = (userId: string | null, userEmail: string | null) => {
+  const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!userId || !groupId) {
+    if (!userId) {
       return;
     }
 
     Promise.resolve().then(() => setLoading(true));
 
     const q = query(
-      collection(db, "notes"),
+      collection(db, "groups"),
       where("userId", "==", userId),
-      where("groupId", "==", groupId),
       where("deleted", "==", false)
     );
 
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        const notesData = snapshot.docs.map((doc) => {
+        const groupsData = snapshot.docs.map((doc) => {
           const data = doc.data();
           return {
             id: doc.id,
-            groupId: data.groupId,
             title: data.title,
-            content: data.content,
-            items: data.items || [],
+            type: data.type,
             userId: data.userId,
+            createdBy: data.createdBy,
             deleted: data.deleted || false,
             deletedAt: data.deletedAt instanceof Timestamp
               ? data.deletedAt.toDate()
@@ -56,16 +54,15 @@ export const useNotes = (userId: string | null, groupId: string | null) => {
               data.updatedAt instanceof Timestamp
                 ? data.updatedAt.toDate()
                 : new Date(),
-          } as Note;
+          } as Group;
         });
         
-        notesData.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+        groupsData.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
         
-        setNotes(notesData);
+        setGroups(groupsData);
         setLoading(false);
       },
       (err) => {
-        console.error("❌ Error fetching notes:", err);
         setError(err.message);
         setLoading(false);
       }
@@ -74,77 +71,61 @@ export const useNotes = (userId: string | null, groupId: string | null) => {
     return () => {
       unsubscribe();
       Promise.resolve().then(() => {
-        setNotes([]);
+        setGroups([]);
         setLoading(false);
       });
     };
-  }, [userId, groupId]);
+  }, [userId]);
 
-  const addNote = async (
-    title: string, 
-    content: string,
-    items?: NoteItem[]
-  ): Promise<string> => {
-    if (!userId || !groupId) throw new Error("User not authenticated or no group selected");
+  const addGroup = async (title: string, type: GroupType): Promise<string> => {
+    if (!userId || !userEmail) throw new Error("User not authenticated");
 
     try {
       setError(null);
-      const docRef = await addDoc(collection(db, "notes"), {
-        groupId,
+      const docRef = await addDoc(collection(db, "groups"), {
         title,
-        content,
-        items: items || [],
+        type,
         userId,
+        createdBy: userEmail,
         deleted: false,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
       return docRef.id;
     } catch (err: unknown) {
+      console.error('❌ Error creating group:', err);
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("Unknown error creating note");
+        setError("Unknown error creating group");
       }
       throw err;
     }
   };
 
-  const updateNote = async (
-    id: string,
-    title: string,
-    content: string,
-    items?: NoteItem[]
-  ): Promise<void> => {
+  const updateGroup = async (id: string, title: string): Promise<void> => {
     try {
       setError(null);
-      const noteRef = doc(db, "notes", id);
-      const updateData: Record<string, unknown> = {
+      const groupRef = doc(db, "groups", id);
+      await updateDoc(groupRef, {
         title,
-        content,
         updatedAt: serverTimestamp(),
-      };
-      
-      if (items !== undefined) {
-        updateData.items = items;
-      }
-      
-      await updateDoc(noteRef, updateData);
+      });
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("Unknown error updating note");
+        setError("Unknown error updating group");
       }
       throw err;
     }
   };
 
-  const deleteNote = async (id: string): Promise<void> => {
+  const deleteGroup = async (id: string): Promise<void> => {
     try {
       setError(null);
-      const noteRef = doc(db, "notes", id);
-      await updateDoc(noteRef, {
+      const groupRef = doc(db, "groups", id);
+      await updateDoc(groupRef, {
         deleted: true,
         deletedAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -153,17 +134,17 @@ export const useNotes = (userId: string | null, groupId: string | null) => {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("Unknown error deleting note");
+        setError("Unknown error deleting group");
       }
       throw err;
     }
   };
 
-  const restoreNote = async (id: string): Promise<void> => {
+  const restoreGroup = async (id: string): Promise<void> => {
     try {
       setError(null);
-      const noteRef = doc(db, "notes", id);
-      await updateDoc(noteRef, {
+      const groupRef = doc(db, "groups", id);
+      await updateDoc(groupRef, {
         deleted: false,
         deletedAt: null,
         updatedAt: serverTimestamp(),
@@ -172,19 +153,19 @@ export const useNotes = (userId: string | null, groupId: string | null) => {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("Unknown error restoring note");
+        setError("Unknown error restoring group");
       }
       throw err;
     }
   };
 
   return { 
-    notes, 
+    groups, 
     loading, 
     error, 
-    addNote, 
-    updateNote, 
-    deleteNote,
-    restoreNote 
+    addGroup, 
+    updateGroup, 
+    deleteGroup,
+    restoreGroup 
   };
 };

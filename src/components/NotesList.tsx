@@ -19,31 +19,42 @@ export const NotesList: React.FC<NotesListProps> = ({
 }) => {
   if (notes.length === 0) {
     return (
-      <div className="text-center text-gray-500 py-8 text-sm sm:text-base">
-        {searchTerm ? 'No notes found' : 'No notes yet'}
+      <div className="text-center text-gray-500 py-12">
+        <div className="glass-dark rounded-2xl p-8 mx-auto max-w-sm">
+          <p className="text-sm font-medium">
+            {searchTerm ? 'No notes found' : 'No notes yet'}
+          </p>
+          {!searchTerm && (
+            <p className="text-xs mt-2 opacity-75">Click "New Note" to create one</p>
+          )}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {notes.map(note => (
         <div
           key={note.id}
           onClick={() => onSelectNote(note)}
-          className={`p-2.5 sm:p-3 rounded-lg cursor-pointer transition-colors active:scale-[0.98] ${
-            selectedNote?.id === note.id
-              ? 'bg-purple-50 border-2 border-purple-500'
-              : 'bg-gray-50 hover:bg-gray-100 active:bg-gray-200 border-2 border-transparent'
-          }`}
+          className={`
+            relative overflow-hidden
+            p-4 rounded-xl cursor-pointer transition-smooth card-hover
+            bg-gradient-to-br from-white to-gray-50
+            ${selectedNote?.id === note.id
+              ? 'ring-2 ring-indigo-500 shadow-lg scale-[1.02]'
+              : 'hover:shadow-md'
+            }
+          `}
         >
-          <div className="flex items-start justify-between gap-2">
+          <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-sm sm:text-base text-gray-800 truncate">{note.title}</h3>
-              <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mt-1 break-words">
+              <h3 className="font-semibold text-base text-gray-800 truncate">{note.title}</h3>
+              <p className="text-sm text-gray-600 line-clamp-2 mt-1.5 break-words">
                 {note.content || 'Empty note'}
               </p>
-              <p className="text-xs text-gray-400 mt-1.5 sm:mt-2">
+              <p className="text-xs text-gray-500 mt-2 font-medium">
                 {note.updatedAt.toLocaleDateString('en-US', {
                   day: '2-digit',
                   month: 'short',
@@ -58,10 +69,10 @@ export const NotesList: React.FC<NotesListProps> = ({
                   onDeleteNote(note.id);
                 }
               }}
-              className="ml-2 p-1.5 hover:bg-red-100 active:bg-red-200 rounded transition-colors shrink-0"
+              className="p-2 hover:bg-red-100 active:bg-red-200 rounded-lg transition-smooth shrink-0"
               title="Delete note"
             >
-              <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500" />
+              <Trash2 className="w-4 h-4 text-red-500" />
             </button>
           </div>
         </div>
